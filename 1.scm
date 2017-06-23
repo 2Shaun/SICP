@@ -1,3 +1,5 @@
+
+
 (define >=
   (lambda (x y)
     (not (< x y))
@@ -75,3 +77,22 @@
 	((= y 1) 2)
 	(else (A (- x 1)
 		 (A x (- y 1))))))
+(define (f n)
+  (define (f-iter sum counter)
+    (if (> counter 3)
+	sum
+	(f-iter (+ (* counter (f (- n counter))) sum) (+ counter 1))
+	)
+    )
+  (if (< n 3)
+      n
+      (f-iter 0 1)
+      )
+  )
+
+(define (infinity)
+  (define (iter counter)
+    (iter (+ counter 1))
+    )
+  (iter 0)
+  )

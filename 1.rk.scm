@@ -83,6 +83,27 @@
         ((= n 1) 1)
         (else (+ (fib (- n 1))
                  (fib (- n 2))))))
-(fib 4)
+
+(define (f n)
+  (define (f-iter sum counter)
+    (if (> counter 3)
+        sum
+        (f-iter (+ (* counter (f (- n counter))) sum) (+ counter 1))
+        )
+    )
+  (if (< n 3)
+      n
+      (f-iter 0 1)
+      )
+  )
+
+(define (infinity)
+  (define (iter counter)
+    (iter (+ counter 1))
+    )
+  (iter 0)
+  )
+
+(infinity)
 
 
