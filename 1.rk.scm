@@ -97,13 +97,14 @@
       )
   )
 
-(define (infinity)
-  (define (iter counter)
-    (iter (+ counter 1))
-    )
-  (iter 0)
-  )
+(define (pascals-triangle row)
+  (define (iter choose)
+    (cond ((or (= choose row) (= choose 0)) (display 1) (iter (+ choose 1)))
+        (else (display (/ (factorial row)
+                    (* (factorial choose)
+                       (factorial (- row choose)))))
+        (iter (+ choose 1)))))
+  (iter 0))
 
-(infinity)
-
-
+(pascals-triangle 5)
+    

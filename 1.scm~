@@ -1,3 +1,5 @@
+
+
 (define >=
   (lambda (x y)
     (not (< x y))
@@ -75,3 +77,31 @@
 	((= y 1) 2)
 	(else (A (- x 1)
 		 (A x (- y 1))))))
+(define (f n)
+  (define (f-iter sum counter)
+    (if (> counter 3)
+	sum
+	(f-iter (+ (* counter (f (- n counter))) sum) (+ counter 1))
+	)
+    )
+  (if (< n 3)
+      n
+      (f-iter 0 1)
+      )
+  )
+
+(define (f-recursive n)
+  (if (< n 3)
+      n
+      (+ (* 1 (f-recursive (- n 1)))
+	 (* 2 (f-recursive (- n 2)))
+	 (* 3 (f-recursive (- n 3))))
+      )
+  )
+
+(define (pascals-triangle row)
+  (if (= n 1)
+      (display 1)
+      (display (+ (pascals-triangle (- n 2))
+		  (pascals-triangle (- n 1)))))
+  )
