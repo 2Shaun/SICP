@@ -99,12 +99,14 @@
 
 (define (pascals-triangle row)
   (define (iter choose)
-    (cond ((or (= choose row) (= choose 0)) (display 1) (iter (+ choose 1)))
-        (else (display (/ (factorial row)
-                    (* (factorial choose)
-                       (factorial (- row choose)))))
-        (iter (+ choose 1)))))
-  (iter 0))
+        (cond ((= choose row) (display 1)(display #\space))
+              ((= choose 0) (display 1)(display #\space) (iter (+ choose 1)))
+              (else (display (/ (factorial row)
+                                (* (factorial choose)
+                                   (factorial (- row choose)))))(display #\space)
+                    (iter (+ choose 1)))))
+    (cond ((= row 0) (display 1)(display #\space))
+        (else (iter 0)(newline)(pascals-triangle (- row 1)))))
 
-(pascals-triangle 5)
+(pascals-triangle 8)
     
