@@ -23,6 +23,27 @@
   (lambda (x) (* x x))
   )
 
+(define power
+  (lambda (x n)
+    (define iter
+      (lambda (count)
+	(if (= count 0)
+	    1
+	    (* x (power x (- n 1))))))
+    (iter n)))
+
+(define phi
+  (lambda (n)
+    (power (/ (+ 1 (sqrt 5)) 2) n)))
+
+(define psi
+  (lambda (n)
+    (power (/ (- 1 (sqrt 5)) 2) n)))
+
+(define fib-formula
+  (lambda (n)
+    (/ (- (phi n) (psi n)) (sqrt 5))))
+
 (define sum-of-squares
   (lambda (x y)
     (+ (square x) (square y))
@@ -109,3 +130,39 @@
                     (iter (+ choose 1)))))
     (cond ((= row 0) (display 1)(display #\space))
         (else (iter 0)(newline)(pascals-triangle (- row 1)))))
+
+(define (infinity x)
+  (display x)
+  (infinity (+ 1 x)))
+
+(define (limit n)
+  (display (/ (+ (* 3 n) 1) n))
+  (limit (+ n 1)))
+
+(define (cube x) (* x x x))
+
+(define (p x) (- (* 3 x) (* 4 (cube x))))
+
+(define (sine angle)
+  (if (not (> (abs angle) 0.1))
+      angle
+      (p (sine (/ angle 3.0)))))
+
+(define (expt-iter b n)
+  (define (iter product counter)
+    (if (= counter n)
+	product
+	(iter (* product b) (+ 1 counter))))
+  (iter b 1))
+
+(define (even? n)
+  (= (remainder n 2) 0))
+
+(define (odd? n)
+  (= (remainder n 2) 1))
+
+(define (fast-expt-iter b n)
+  (define (iter b counter product)
+    (cond ((= counter 0) (/ (sqrt product) b))
+	  (else (iter b (- counter 1) (* product (square b))))))
+  (iter b (+ n 1) 1))
