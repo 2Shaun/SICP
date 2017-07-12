@@ -163,6 +163,19 @@
 
 (define (fast-expt-iter b n)
   (define (iter b counter product)
-    (cond ((= counter 0) (/ (sqrt product) b))
-	  (else (iter b (- counter 1) (* product (square b))))))
-  (iter b (+ n 1) 1))
+    (cond ((= counter 0) 1)
+	  ((even? counter) (* product (iter b (half counter) (square b))))
+	  (else (* product (iter b (- counter 1) (* product b))))))
+  (iter b n 1))
+
+(define (double n)
+  (* 2 n))
+
+(define (half n)
+  (/ n 2))
+
+(define (fast-multiply b n)
+  (cond ((= n 0) 0)
+	((even? n) (+ (double b) (fast-multiply b (- n 2))))
+	(else (+ b (fast-multiply b (- n 1))))))
+
