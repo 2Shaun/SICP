@@ -1,4 +1,3 @@
-
 (define >=
   (lambda (x y)
     (not (< x y))
@@ -179,3 +178,9 @@
 	((even? n) (+ (double b) (fast-multiply b (- n 2))))
 	(else (+ b (fast-multiply b (- n 1))))))
 
+(define (fast-multiply-iter b n)
+  (define (iter product counter)
+    (cond ((<= counter 1) product)
+	  ((even? counter) (iter (+ product (double b)) (- counter 2)))
+	  (else (iter (+ product b) (- counter 1)))))
+  (iter 0 n))
