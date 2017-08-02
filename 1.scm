@@ -296,3 +296,52 @@
   (cond ((= times 0) true)
 	((fermat-test n) (fast-prime? n (- times 1)))
 	(else (false))))
+
+(define (sum term a next b)
+  (if (> a b)
+      0
+      (+ (term a)
+	 (sum term (next a) next b))))
+
+(define (inc n) (+ n 1))
+
+(define (identity x) x)
+
+(define (sum-integers a b)
+  (sum indentity a inc b))
+
+(define (pi-sum a b)
+  (define (pi-term x)
+    (/ 1.0 (* x (+ x 2))))
+  (define (pi-next x)
+    (+ x 4))
+  (sum pi-term a pi-next b))
+
+(define (sum-cubes a b)
+  (sum cube a inc b))
+
+;(define (simpsons-rule f a b n)
+;  (define (iter k)
+;    (if (< k n)
+;	(+ (* (power 2 (remainder (power -1 k) 3))
+;	    (/ (/ (- b a) n) 3) (f (+ a (* k
+;					     (/ (- b a) n)))))
+;	   (iter (+ k 1)))
+;	0))
+;  (iter 0))
+;
+
+(define (simpsons-rule f a b n)
+  (define (iter k)
+    (if (< k n)
+	(+ (*
+	    (cond ((or (= k 1) (= k n)) 1)    ; return 1, 2, or 4 for the coefficient
+		  ((even? k) 2)
+		  (else 4))
+	    (/ (/ (- b a) n) 3)               ; h/3
+	    (f
+	     (+ a (* k (/ (- b a) n)))        ; y_k
+	     ))
+	   (iter (+ k 1)))                    ; + (1 || 2 || 4) * h/3 * y_{k+1}
+	0))
+  (iter 0))
