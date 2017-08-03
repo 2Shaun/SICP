@@ -331,17 +331,46 @@
 ;  (iter 0))
 ;
 
-(define (simpsons-rule f a b n)
+(define (simpsons-rule-first-order f a b n)
+  (define h (/ (- b a) n))
   (define (iter k)
     (if (< k n)
 	(+ (*
 	    (cond ((or (= k 1) (= k n)) 1)    ; return 1, 2, or 4 for the coefficient
 		  ((even? k) 2)
 		  (else 4))
-	    (/ (/ (- b a) n) 3)               ; h/3
-	    (f
-	     (+ a (* k (/ (- b a) n)))        ; y_k
-	     ))
-	   (iter (+ k 1)))                    ; + (1 || 2 || 4) * h/3 * y_{k+1}
+	    (/ h 3)                           ; h/3
+	    (f (+ a (* k (/ (- b a) n)))))    ; y_k
+	   (iter (inc k)))                   ; + (1 || 2 || 4) * h/3 * y_{k+1}
 	0))
   (iter 0))
+
+(define (simpsons-rule f a b n)
+  (define h (/ (- b a) n))
+  (define y (f (+ a (* k (/ (- b a) n)))))
+  (define term (* (cond ((or (= k 1) (= k n)) 1)
+		     ((even? k) 2)
+		     (else 4)) y))
+  (* (/ h 3) (sum term a next b)))
+
+(define (sum-iter term a next b)
+  (define (iter a result)
+    (if (> a b)
+	result
+	(iter (next a) (+ result (term a)))))
+  (iter (next a) (term a)))
+
+(define (product-iter term a next b)
+  (define (iter a result)
+    (if (> a b)
+	result
+	(iter (next a) (* result (term a)))))
+  (iter (next a) (term a)))
+
+(define (product term a next b)
+  (if (< a b)
+      (* (term a) (product term (next a) next b))
+      (term a)))
+
+(define (pi-approx n)
+  (/ (* (* 2 n) (* 2 (+ n 1))) (square (+ (* 2 n) 1))))
