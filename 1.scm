@@ -374,3 +374,14 @@
 
 (define (pi-approx n)
   (/ (* (* 2 n) (* 2 (+ n 1))) (square (+ (* 2 n) 1))))
+
+(define (accumulate combiner null-value term a next b)
+  (cond ((< a b) (combiner (term a) (accumulate combiner null-value term (next a) next b)))
+	 ((= a b) (term a))
+	 (else null-value)))
+
+(define (accumulate-iter combiner null-value term a next b)
+  (define (iter a result)
+    (cond ((<= a b) (iter (next a) (combiner result (term a))))
+	  (else null-value))
+  (iter a a))
