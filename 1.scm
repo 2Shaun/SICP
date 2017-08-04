@@ -382,6 +382,16 @@
 
 (define (accumulate-iter combiner null-value term a next b)
   (define (iter a result)
-    (cond ((<= a b) (iter (next a) (combiner result (term a))))
-	  (else null-value))
-  (iter a a))
+    (cond ((< a b) (iter (next a) (combiner result (term a))))
+	  ((> a b) null-value)
+	  (else (combiner result (term a)))))
+  (iter a null-value))
+
+(define (filtered-accumulate combiner filter null-value term a next b)
+  (cond ((< a b) (combiner
+		  (if (filter a) (term a)
+		      null-value)
+		  (filtered-accumulate combiner filter null-value term (next a) next b)))
+	 ((= a b) (if (filter a) (term a)
+		      null-value))
+	(else null-value)))
