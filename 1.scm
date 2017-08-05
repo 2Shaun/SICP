@@ -297,6 +297,11 @@
 	((fermat-test n) (fast-prime? n (- times 1)))
 	(else (false))))
 
+(define (gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
+
 (define (sum term a next b)
   (if (> a b)
       0
@@ -395,3 +400,9 @@
 	 ((= a b) (if (filter a) (term a)
 		      null-value))
 	(else null-value)))
+
+(define (rel-prime? n)
+  (define (rel-prime?-n i)
+    (if (= (gcd n i) 1) true
+	false))
+  rel-prime?-n)
