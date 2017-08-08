@@ -406,3 +406,33 @@
     (if (= (gcd n i) 1) true
 	false))
   rel-prime?-n)
+
+(define tolerance 0.00001)
+
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (let ((next (f guess)))
+    (display guess)
+    (newline)
+      (if (close-enough? guess next)
+	  next
+	  (try next))))
+  (try first-guess))
+
+(define (sqrt x)
+  (fixed-point (lambda (y) (average y (/ x y)))
+	       1.0))
+
+(define (cont-frac n d k)
+  (define (iter i)
+    (if (< i k) (/ (n i) (+ (d i) (iter (+ i 1))))
+	(/ (n k) (d k))))
+  (iter 1))
+
+(define (cont-frac-iter n d k)
+  (define (iter i result)
+    (if (> i 0) (iter (- i 1) (+ (/ (n i) result) (d (- i 1))))
+	(/ 1 result)))
+  (iter k (d k)))
