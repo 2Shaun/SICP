@@ -431,8 +431,24 @@
 	(/ (n k) (d k))))
   (iter 1))
 
-(define (cont-frac-iter n d k)
+(define (cont-frac-iter-recip n d k)
   (define (iter i result)
     (if (> i 0) (iter (- i 1) (+ (/ (n i) result) (d (- i 1))))
 	(/ 1 result)))
   (iter k (d k)))
+
+(define (cont-frac-iter n d k)
+  (define (iter i result)
+    (if (> i 0) (iter (- i 1) (/ (n i) (+ (d i) result)))
+	result))
+  (iter (- k 1) (/ (n k) (d k))))
+
+(define (euler-expansion i)
+  (if (= (remainder i 3) 2)
+      (* 2 (ceiling (/ i 3)))
+      1))
+
+(define e (+ 2 (cont-frac (lambda (x) 1.0) euler-expansion 10)))
+
+(define (tan x)
+  (/ x (+ 1 (cont-frac (lambda (i) (- (square x))) (lambda (i) (+ (* 2 i) 1)) 100)))) 
