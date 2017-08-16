@@ -421,9 +421,6 @@
 	  (try next))))
   (try first-guess))
 
-(define (sqrt x)
-  (fixed-point (lambda (y) (average y (/ x y)))
-	       1.0))
 
 (define (cont-frac n d k)
   (define (iter i)
@@ -450,5 +447,55 @@
 
 (define e (+ 2 (cont-frac (lambda (x) 1.0) euler-expansion 10)))
 
-(define (tan x)
+(define (tan-cf x)
   (/ x (+ 1 (cont-frac (lambda (i) (- (square x))) (lambda (i) (+ (* 2 i) 1)) 100)))) 
+
+(define (average-damp f)
+  (lambda (x) (/ (+ x (f x)) 2)))
+
+(define dx 0.00001)
+
+(define (deriv g)
+  (lambda (x)
+    (/ (- (g (+ x dx)) (g x))
+       dx)))
+
+(define (newton-transform g)
+  (lambda (x)
+    (- x (/ (g x) ((deriv g) x)))))
+
+(define (newtons-method g guess)
+  (fixed-point (newton-transform g) guess))
+
+(define (sqrt x)
+  (newtons-method (lambda (y) (- (square y) x))
+		  1.0))
+
+(define (cubic a b c)
+  (lambda (x) (+ (cube x) (* a (square x)) (* b x) c)))
+
+(define (double f)
+  (lambda (x) (f (f x))))
+
+(define (compose f g)
+  (lambda (x) (f (g x))))
+
+(define (repeated-iter f n)
+  (define (iter composition i)
+    (cond ((= i 0) composition)
+	  ((even? i) (iter (compose composition (double f)) (- i 2)))
+	  (else (iter (compose composition f) (- i 1)))))
+  (iter f (- n 1)))
+
+(define (repeated f n)
+  (if (> n 1) (compose f (repeated f (- n 1)))
+      (lambda (x) (f x))))
+
+(define (average x y z)
+  (/ (+ x y z) 3))
+
+(define (smooth f)
+  (lambda (x) (average (f (- x dx)) (f x) (f (+ x dx)))))
+
+(define (fourth-root x)
+  (fixed-point (double (average-damp (lambda (y) (/ x y)))) 1.0))
