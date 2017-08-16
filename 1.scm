@@ -407,7 +407,7 @@
 	false))
   rel-prime?-n)
 
-(define tolerance 0.00001)
+(define tolerance 0.00000001)
 
 (define (fixed-point f first-guess)
   (define (close-enough? v1 v2)
@@ -489,7 +489,12 @@
 
 (define (repeated f n)
   (if (> n 1) (compose f (repeated f (- n 1)))
-      (lambda (x) (f x))))
+      f))
+
+(define (repeated f x)
+  (if (= x 1)
+      f
+      (compose f (repeated f (- x 1)))))
 
 (define (average x y z)
   (/ (+ x y z) 3))
@@ -498,4 +503,16 @@
   (lambda (x) (average (f (- x dx)) (f x) (f (+ x dx)))))
 
 (define (fourth-root x)
-  (fixed-point (double (average-damp (lambda (y) (/ x y)))) 1.0))
+  (fixed-point (double (average-damp (lambda (y) (/ x (cube y))))) 1.0))
+
+(define (fifth-root x r)
+  (fixed-point ((repeated average-damp r) (lambda (y) (/ x (expt y 4)))) 1.0))
+
+(define (eigth-root x)
+  (fixed-point (repeated-iter (average-damp (lambda (y) (/ x (expt y 7)))) 20) 1.0))
+
+(define (log2 n)
+  (/ (log n) (log 2)))
+
+(define (nth-root x n)
+  (fixed-point ((repeated average-damp (floor (log2 n))) (lambda (y) (/ x (expt y (- n 1))))) 1.0))
