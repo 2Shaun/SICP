@@ -467,9 +467,9 @@
 (define (newtons-method g guess)
   (fixed-point (newton-transform g) guess))
 
-(define (sqrt x)
-  (newtons-method (lambda (y) (- (square y) x))
-		  1.0))
+;(define (sqrt x)
+;  (newtons-method (lambda (y) (- (square y) x))
+;		  1.0))
 
 (define (cubic a b c)
   (lambda (x) (+ (cube x) (* a (square x)) (* b x) c)))
@@ -516,3 +516,30 @@
 
 (define (nth-root x n)
   (fixed-point ((repeated average-damp (floor (log2 n))) (lambda (y) (/ x (expt y (- n 1))))) 1.0))
+
+(define (iterative-improve good-enough? improve)    ; takes in two procedures as arguments (good-enough? & improve)
+  (define (iter guess)                              ; return a procedure that takes a guess
+    (if (good-enough? guess)                        ; until it is good enough
+	guess
+	(iter (improve guess))))                    ; and keeps improving its guess
+  (lambda (guess) (iter guess)))                 
+
+;(define (sqrt146 x)
+;  (define (good-enough? guess)                     there is a binding issue here
+;    (lambda (guess) (< (abs (- (square guess) x)) 0.001)))
+;  (define (improve guess)
+;    (lambda (guess) (/ (+ guess (/ x guess)) 2)))
+;  (iterative-improve good-enough? improve) 1.0)
+
+(define (sqrt x)
+  ((iterative-improve
+    (lambda (guess) (< (abs (- (square guess) x)) 0.001))
+    (lambda (guess) (/ (+ guess (/ x guess)) 2))) 1.0))
+
+(define (fixed-point f first-guess)
+  ((iterative-improve
+    (lambda (guess) (< (abs (- guess (f guess))) 0.00001))
+    (lambda (guess) (f guess))) first-guess))
+
+(define (multiply-by x)                             ; currying
+  (lambda (y) (* x y)))                             ; evaluate each argument one function at a time

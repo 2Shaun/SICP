@@ -1,0 +1,18 @@
+#lang racket
+(define (square x)
+  (* x x))
+(define (iterative-improve good-enough? improve)    ; takes in two procedures as arguments (good-enough? & improve)
+  (define (iter guess)                              ; return a procedure that takes a guess
+    (if (good-enough? guess)                        ; until it is good enough
+	guess
+	(iter (improve guess))))
+  iter)                   ; and keeps improving its guess
+
+(define (sqrt146 x)
+  (define (good-enough? guess)
+    (< (abs (- (square guess) x)) 0.001))
+  (define (improve guess)
+    (/ (+ guess (/ x guess))) 2)
+  (iterative-improve good-enough? improve) 1.0)
+
+(sqrt146 2)
