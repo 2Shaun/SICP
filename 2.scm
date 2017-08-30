@@ -70,11 +70,14 @@
 (define (rectangle seg1 seg2)  ; doesn't validate that seg1 is touching seg2 (they must share a point
   (cons seg1 seg2))
 
+(define (rectangle-p p1 corner p2)
+  (cons (make-segment p1 corner) (make-segment corner p2)))
+
 (define (length rect)
   (distance (car rect)))
 
-(define (width rect)
-  (distance (cdr rect)))
+;(define (width rect)
+;  (distance (cdr rect)))
 
 (define (area rect)
   (* (length rect) (width rect)))
@@ -82,10 +85,23 @@
 (define (perimeter rect)
   (+ (* 2 (length rect)) (* 2 (width rect))))
 
-(define l (make-segment (make-point 1 1) (make-point 1 3)))
+;(define l (make-segment (make-point 1 1) (make-point 1 3)))
 
-(define w (make-segment (make-point 1 3) (make-point 4 3)))
+;(define w (make-segment (make-point 1 3) (make-point 4 3)))
 
-(define r (rectangle l w))
+;(define r (rectangle l w))
 
-(area r)
+;(define rp (rectangle-p (make-point 1 1) (make-point 1 3) (make-point 4 3)))
+
+;(display (area r))
+;(newline)
+;(display (area rp))
+;(newline)
+;(display (perimeter r))
+;(perimeter r)
+
+(define (cons x y)
+  (lambda (m) x y))
+
+(define (car z)
+  (z (lambda (p q) p)))
