@@ -38,3 +38,106 @@
 (define one (lambda (f) (lambda (x) (f x))))
 
 (define two (lambda (f) (lambda (x) (f (f x)))))
+
+(define (add-interval x y)
+  (make-interval (+ (lower-bound x) (lower-bound y))
+		 (+ (upper-bound x) (upper-bound y))))
+
+(define (mul-interval x y)
+  (let ((p1 (* (lower-bound x) (lower-bound y)))
+	(p2 (* (lower-bound x) (upper-bound y)))
+	(p3 (* (upper-bound x) (lower-bound y)))
+	(p4 (* (upper-bound x) (upper-bound y))))
+    (make-interval (min p1 p2 p3 p4)
+		   (max p1 p2 p3 p4))))
+
+(define (positive? x)
+  (>= x 0))
+
+(define (negative? x)
+  (< x 0))
+
+(define (mul-interval x y)
+        ;(+,+)*(+,+)  
+  (cond ((and (positive? (lower-bound x)) (positive? (upper-bound x))
+	      (positive? (lower-bound y)) (positive? (upper-bound y)))
+	 (make-interval (* (lower-bound x) (lower-bound y)) (* (upper-bound x) (upper-bound y))))
+	;(-,+)*(+,+)
+	((and (negative? (lower-bound x)) (positive? (upper-bound x))
+	      (positive? (lower-bound y)) (positive? (upper-bound y)))
+	 (make-interval (* (lower-bound x) (upper-bound y)) (* (upper-bound x) (upper-bound y))))
+	;(-,-)*(+,+)
+	((and (negative? (lower-bound x)) (negative? (upper-bound x))
+	      (positive? (lower-bound y)) (positive? (upper-bound y)))
+	 (make-interval (* (lower-bound x) (upper-bound y)) (* (upper-bound x) (lower-bound y))))
+	;(+,+)*(-,+)
+	((and (positive? (lower-bound x)) (positive? (upper-bound x))
+	      (negative? (lower-bound y)) (positive? (upper-bound y)))
+	 (make-interval (* (upper-bound x) (lower-bound y)) (* (upper-bound x) (upper-bound y))))
+	;(-,+)*(-,+) requires a call to max and min
+	((and (positive? (lower-bound x)) (positive? (upper-bound x))
+	      (positive? (lower-bound y)) (positive? (upper-bound y)))
+	 (make-interval (min (* (lower-bound x) (upper-bound y))
+			     (* (upper-bound x) (lower-bound y)))
+			(max (* (lower-bound x) (lower-bound y))
+			     (* (upper-bound x) (upper-bound y)))))
+	;(-,-)*(-,+)
+	((and (negative? (lower-bound x)) (negative? (upper-bound x))
+	      (negative? (lower-bound y)) (positive? (upper-bound y)))
+	 (make-interval (* (lower-bound x) (upper-bound y)) (* (lower-bound x) (lower-bound y))))
+	;(+,+)*(-,-)
+	((and (positive? (lower-bound x)) (positive? (upper-bound x))
+	      (negative? (lower-bound y)) (negative? (upper-bound y)))
+	 (make-interval (* (upper-bound x) (lower-bound y)) (* (lower-bound x) (upper-bound y))))
+	;(-,+)*(-,-)
+	((and (negative? (lower-bound x)) (positive? (upper-bound x))
+	      (positive? (lower-bound y)) (positive? (upper-bound y)))
+	 (make-interval (* (upper-bound x) (lower-bound y)) (* (lower-bound x) (lower-bound y))))
+	;(-,-)*(-,-)
+	((and (negative? (lower-bound x)) (negative? (upper-bound x))
+	      (negative? (lower-bound y)) (negative? (upper-bound y)))
+	 (make-interval (* (upper-bound x) (upper-bound y)) (* (lower-bound x) (lower-bound y))))))
+
+(define (div-interval x y)
+  (mul-interval x
+		(make-interval (/ 1.0 (upper-bound y))
+			       (/ 1.0 (lower-bound y)))))
+
+(define (div-interval x y)
+  (if (not (= (upper-bound y) 0))
+      (if (not (= (lower-bound y) 0))
+	  (mul-interval x
+			(make-interval (/ 1.0 (upper-bound y))
+				       (/ 1.0 (lower-bound y))))
+	  (display "err: div by zero")
+      (display "err: div by zero"))))
+
+(define (make-interval a b) (cons a b))
+
+(define (upper-bound x)
+  (cdr x))
+
+(define (lower-bound x)
+  (car x))
+
+(define (sub-interval x y)
+  (make-interval (- (lower-bound x) (lower-bound y))
+		 (- (lower-bound x) (lower-bound y))))
+
+(define (width x)
+  (/ (- (upper-bound x) (lower-bound x) ) 2.0) )
+
+(define (make-center-width c w)
+  (make-interval (- c w) (+ c w)))
+
+(define (center i)
+  (/ (+ (lower-bound i) (upper-bound i) ) 2))
+
+(define (width i)
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+
+(define (make-center-percent c p)
+  (make-interval (- c (* c p)) (+ c (* c p))))
+
+(define (percent x)
+  (/ (width x) (center x)))jj
