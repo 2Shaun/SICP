@@ -6,23 +6,23 @@
 
 ;(define (cdr z)
 ;  (z (lambda (p q) q)))
+;warning: this function overrides cons
+;(define (cons a b)
+; (* (expt 2 a) (expt 3 b)))
 
-(define (cons a b)
-  (* (expt 2 a) (expt 3 b)))
+;(define (car z)
+;  (define (iter z a)             ; the letter a was arbitrarily chosen here to match cons
+;    (if (even? z)
+;	(iter (/ z 2) (+ a 1))
+;	a))
+;  (iter z 0))
 
-(define (car z)
-  (define (iter z a)             ; the letter a was arbitrarily chosen here to match cons
-    (if (even? z)
-	(iter (/ z 2) (+ a 1))
-	a))
-  (iter z 0))
-
-(define (cdr z)
-  (define (iter z b)
-    (if (= (remainder z 3) 0)
-	(iter (/ z 3) (+ b 1))
-	b))
-  (iter z 0))
+;(define (cdr z)
+;  (define (iter z b)
+;    (if (= (remainder z 3) 0)
+;	(iter (/ z 3) (+ b 1))
+;	b))
+;  (iter z 0))
 
 (define zero (lambda (f) (lambda (x) x)))    ; not the typical numeral zero, but a numeral that says
                                              ; 'apply f zero times'
@@ -75,12 +75,10 @@
 	      (negative? (lower-bound y)) (positive? (upper-bound y)))
 	 (make-interval (* (upper-bound x) (lower-bound y)) (* (upper-bound x) (upper-bound y))))
 	;(-,+)*(-,+) requires a call to max and min
-	((and (positive? (lower-bound x)) (positive? (upper-bound x))
-	      (positive? (lower-bound y)) (positive? (upper-bound y)))
-	 (make-interval (min (* (lower-bound x) (upper-bound y))
-			     (* (upper-bound x) (lower-bound y)))
-			(max (* (lower-bound x) (lower-bound y))
-			     (* (upper-bound x) (upper-bound y)))))
+	((and (negative? (lower-bound x)) (positive? (upper-bound x))
+	      (negative? (lower-bound y)) (positive? (upper-bound y)))
+	 (make-interval (min (* (lower-bound x) (upper-bound y)) (* (upper-bound x) (lower-bound y)))
+			(max (* (lower-bound x) (lower-bound y)) (* (upper-bound x) (upper-bound y)))))
 	;(-,-)*(-,+)
 	((and (negative? (lower-bound x)) (negative? (upper-bound x))
 	      (negative? (lower-bound y)) (positive? (upper-bound y)))
@@ -91,7 +89,7 @@
 	 (make-interval (* (upper-bound x) (lower-bound y)) (* (lower-bound x) (upper-bound y))))
 	;(-,+)*(-,-)
 	((and (negative? (lower-bound x)) (positive? (upper-bound x))
-	      (positive? (lower-bound y)) (positive? (upper-bound y)))
+	      (negative? (lower-bound y)) (negative? (upper-bound y)))
 	 (make-interval (* (upper-bound x) (lower-bound y)) (* (lower-bound x) (lower-bound y))))
 	;(-,-)*(-,-)
 	((and (negative? (lower-bound x)) (negative? (upper-bound x))
@@ -109,8 +107,8 @@
 	  (mul-interval x
 			(make-interval (/ 1.0 (upper-bound y))
 				       (/ 1.0 (lower-bound y))))
-	  (display "err: div by zero")
-      (display "err: div by zero"))))
+	  (display "err: div by zero"))
+      (display "err: div by zero")))
 
 (define (make-interval a b) (cons a b))
 
@@ -140,4 +138,4 @@
   (make-interval (- c (* c p)) (+ c (* c p))))
 
 (define (percent x)
-  (/ (width x) (center x)))jj
+  (/ (width x) (center x)))
