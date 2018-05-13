@@ -105,3 +105,22 @@
 
 (define (car z)
   (z (lambda (p q) p)))
+
+(define (append list1 list2)
+(if (null? list1)
+list2
+(cons (car list1) (append (cdr list1) list2))))
+
+; when dealing with recursion
+; you need to pay close attention to data types
+; return types, argument types, etc.
+; car outputs a list element
+; cdr outputs a list
+; append takes in two lists
+; it's important that were 'going down' the recursion tree first
+
+
+(define (reverse l)
+(if (= (length l) 1)
+l
+(append (reverse (cdr l)) (list (car l))))) 

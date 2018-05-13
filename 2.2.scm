@@ -100,7 +100,7 @@
   (mul-interval x
 		(make-interval (/ 1.0 (upper-bound y))
 			       (/ 1.0 (lower-bound y)))))
-
+;going to need to redefine div-interval to use the percentage version of make-interval
 (define (div-interval x y)
   (if (not (= (upper-bound y) 0))
       (if (not (= (lower-bound y) 0))
@@ -111,6 +111,9 @@
       (display "err: div by zero")))
 
 (define (make-interval a b) (cons a b))
+
+(define (make-interval c p)
+  (cons (- c (* c p)) (+ c (* c p))))
 
 (define (upper-bound x)
   (cdr x))
@@ -139,3 +142,16 @@
 
 (define (percent x)
   (/ (width x) (center x)))
+
+(define (product-percent x y)
+  (/ (+ (percent y) (percent x)) (+ 1 (* (percent x) (percent y)))))
+
+(define (par1 r1 r2)
+  (div-interval (mul-interval r1 r2)
+		(add-interval r1 r2)))
+
+(define (par2 r1 r2)
+  (let ((one (make-interval 1 1)))
+    (div-interval one
+		  (add-interval (div-interval one r1)
+				(div-interval one r2)))))
