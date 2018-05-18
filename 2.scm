@@ -61,7 +61,7 @@
   (make-point (average (x-point (p1 seg)) (x-point (p2 seg)))
 	      (average (y-point (p1 seg)) (y-point (p2 seg)))))
 
-(print-point (midpoint (make-segment (make-point 1 2) (make-point 2 3))))
+;(print-point (midpoint (make-segment (make-point 1 2) (make-point 2 3))))
 
 (define (distance seg)
   (sqrt (+ (square (- (x-point (p1 seg)) (x-point (p2 seg))))
@@ -73,8 +73,8 @@
 (define (rectangle-p p1 corner p2)
   (cons (make-segment p1 corner) (make-segment corner p2)))
 
-(define (length rect)
-  (distance (car rect)))
+;(define (length rect)
+;  (distance (car rect)))
 
 ;(define (width rect)
 ;  (distance (cdr rect)))
@@ -114,13 +114,59 @@ list2
 ; when dealing with recursion
 ; you need to pay close attention to data types
 ; return types, argument types, etc.
-; car outputs a list element
-; cdr outputs a list
-; append takes in two lists
+; car inputs a list and outputs a list element
+; cdr inputs a list and outputs a list
+; append inputs two lists and outputs a list
 ; it's important that were 'going down' the recursion tree first
+; we go down to the last element and that is appended on the left
 
+(define (length items)
+  (if (null? items)
+      0
+      (+ 1 (length (cdr items)))))
 
 (define (reverse l)
 (if (= (length l) 1)
 l
 (append (reverse (cdr l)) (list (car l))))) 
+
+(define us-coins (list 50 25 10 5 1))
+
+(define uk-coins (list 100 50 20 10 5 2 1 0.5))
+
+(define (cc amount coin-values)
+  (cond ((= amount 0) 1)
+	((or (< amount 0) (no-more? coin-values)) 0)
+	(else
+	 (+ (cc amount
+		(except-first-denomination coin-values))
+	    (cc (- amount
+		   (first-denomination coin-values))
+		coin-values)))))
+
+(define (first-denomination coin-values)
+  (car coin-values))
+
+(define (except-first-denomination coin-values)
+  (cdr coin-values))
+
+(define (no-more? coin-values)
+  (= (length coin-values) 0))
+
+;(define (same-parity x . y)
+;  (if (= (length y) 0)
+;      y
+;      (if (= (remainder x 2) (remainder (car y) 2))
+;	  (append (list (car y)) (same-parity x (cdr y)))
+;	  (same-parity x (cdr y)))))
+
+
+(define (same-parity x . y)
+  (define (same-parity-iter current-y parity-list)
+    (if (> (length current-y) 0)
+        (if (= (remainder x 2) (remainder (car current-y) 2))
+            (same-parity-iter (cdr current-y) (append (list (car current-y) parity-list)))
+            (same-parity-iter (cdr current-y) parity-list))
+        parity-list))
+  (same-parity-iter y (list)))
+
