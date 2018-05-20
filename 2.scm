@@ -100,11 +100,13 @@
 ;(display (perimeter r))
 ;(perimeter r)
 
-(define (cons x y)
-  (lambda (m) x y))
+; THESE WERE CAUSING A MAJOR HEADACHE
+; LISTS WERE 'not applicable'
+;(define (cons x y)
+;  (lambda (m) x y))
 
-(define (car z)
-  (z (lambda (p q) p)))
+;(define (car z)
+;  (z (lambda (p q) p)))
 
 (define (append list1 list2)
 (if (null? list1)
@@ -153,20 +155,166 @@ l
 (define (no-more? coin-values)
   (= (length coin-values) 0))
 
-;(define (same-parity x . y)
-;  (if (= (length y) 0)
-;      y
-;      (if (= (remainder x 2) (remainder (car y) 2))
-;	  (append (list (car y)) (same-parity x (cdr y)))
-;	  (same-parity x (cdr y)))))
+(define (same-parity x . y)
+  (if (= (length y) 0)
+      y
+      (if (= (remainder x 2) (remainder (car y) 2))
+	  (append (list (car y)) (same-parity x (cdr y)))
+	  (same-parity x (cdr y)))))
 
 
 (define (same-parity x . y)
   (define (same-parity-iter current-y parity-list)
     (if (> (length current-y) 0)
         (if (= (remainder x 2) (remainder (car current-y) 2))
-            (same-parity-iter (cdr current-y) (append (list (car current-y) parity-list)))
+            (same-parity-iter (cdr current-y) (append (list (car current-y)) parity-list))
             (same-parity-iter (cdr current-y) parity-list))
         parity-list))
   (same-parity-iter y (list)))
 
+(define (map proc items)
+  (if (null? items)
+      (list)
+      (cons (proc (car items))
+	    (map proc (cdr items)))))
+
+(define (scale-list items factor)
+  (map (lambda (x) (* x factor)) items))
+
+(define (square-list items)
+  (if (null? items)
+      items
+      (cons (square (car items)) (square-list (cdr items)))))
+
+(define (square-list-map items)
+  (map square items))
+
+; the issue has to do with types
+; answer is going to have pairs passed in (lists of size 2)
+; cons then creates a pair of a pair and an integer
+; using append, we can pass the integer as a singleton (list of size 1)
+; and append the two lists
+(define (square-list items)
+  (define (iter things answer)
+    (if (null? things)
+	answer
+	(iter (cdr things)
+	      (append answer
+		    (list (square (car things)))))))
+  (iter items (list)))
+
+(define (for-each proc lst)
+  (define (for-each-iter current-lst)
+    (cond ((> (length current-lst) 0) (proc (car current-lst))
+	   (for-each-iter (cdr current-lst)))
+	  ((= (length current-lst) 0) #t)))
+  (for-each-iter lst))
+
+(define l (list 1 3 (list 5 7) 9))
+
+; (car(cdr(car(cdr(cdr l)))))
+
+(define l (list (list 7)))
+
+; (car (car l))
+
+; notice that the outer list is two items
+; 1 and the next list
+; cdr will give us a singleton
+; the only element being the next list
+; you can think of a (car (cdr 
+; as chopping off the far left (1
+; we need 6 of those
+
+(define l (list 1 (list 2 (list 3 (list 4 (list 5 (list 6 7)))))))
+
+;(car (cdr (car (cdr (car (cdr (car (cdr (car (cdr (car (cdr l))))))))))))
+
+; pretty complicated but seems to work
+; want to write it using map
+
+; deep-reverse accepts a list and returns a list
+(define (deep-reverse l)
+  (cond ((null? l) l)
+	((= (length l) 1)
+	 (if (pair? (car l)) (list (deep-reverse (car l))) ; when I append this list
+	     (list (car l))))                              ; the inner list is preserved, outer list not
+	(else (append (deep-reverse (cdr l)) (deep-reverse (list (car l))))))) 
+
+; fringe accepts a list and returns a list
+; notice that if I call append on two singletons,
+; it will return a list of numbers (non-lists)
+(define (fringe l)
+  (cond ((null? l) l)
+	((= (length l) 1) ; keep applying fringe until (list (car l)) is a singleton
+	 (if (pair? (car l)) (fringe (car l))
+	     (list (car l))))
+	(else (append (fringe (list (car l))) (fringe (cdr l))))))
+
+(define (make-mobile left right)
+  (list left right))
+
+(define (make-branch length structure)
+  (list length structure))
+
+(define (left-branch mobile)
+  (car mobile))
+
+(define (right-branch mobile)
+  (car (cdr mobile)))
+
+(define (branch-length branch)
+  (car branch))
+
+(define (branch-structure branch)
+  (car (cdr branch)))
+
+(define (make-mobile left right)
+  (cons left right))
+
+(define (make-branch length structure)
+  (cons length structure))
+
+; these seem like the only two methods we need to change
+(define (right-branch mobile)
+  (cdr mobile))
+
+(define (branch-structure branch)
+  (cdr branch))
+
+(define m1 (make-mobile (make-branch 2 5) (make-branch 2 5)))
+
+(define m2 (make-mobile (make-branch 2 5)
+			(make-branch 2 (make-mobile (make-branch 2 5)
+						    (make-branch 2 5)))))
+(define m3 (make-mobile (make-branch 1 (make-mobile
+					(make-branch 1 (make-mobile
+							(make-branch 1 1) (make-branch 1 1)))
+					(make-branch 1 2)))
+			(make-branch 2 2)))
+					
+
+;(+ (total-weight (branch-structure (left-branch mobile))) (total-weight (branch-structure (right-branch mobile))))
+(define (total-weight mobile)
+  (if (null? mobile) 0
+      (if (not (pair? mobile)) mobile
+      (+ (total-weight (branch-structure (left-branch mobile)))
+	 (total-weight (branch-structure (right-branch mobile)))))))
+
+
+;(= (* (branch-length (left branch)) (total-weight (branch-structure (left-branch mobile))))
+;   (* (branch-length (right branch)) (total-weight (branch-structure (right-branch mobile)))))
+;(and (balanced? (branch-structure (left-branch mobile)))
+;     (balanced? (branch-structure (right-branch mobile))))
+;(pair? (branch-structure (left-branch mobile)))
+
+(define (torque branch)
+  (* (branch-length branch) (total-weight (branch-structure branch))))
+
+(define (balanced? mobile)
+  (and (if (not (pair? (branch-structure (left-branch mobile)))) #t
+	   (balanced? (branch-structure (left-branch mobile))))
+       (if (not (pair? (branch-structure (right-branch mobile)))) #t
+	   (balanced? (branch-structure (right-branch mobile))))
+       (= (torque (left-branch mobile))
+	  (torque (right-branch mobile)))))
