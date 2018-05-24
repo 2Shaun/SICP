@@ -318,3 +318,53 @@ l
 	   (balanced? (branch-structure (right-branch mobile))))
        (= (torque (left-branch mobile))
 	  (torque (right-branch mobile)))))
+
+(define (square-tree t)
+  (cond ((null? t) t)
+	((pair? t) (cons (square-tree (car t)) (square-tree (cdr t))))
+	(else (* t t))))
+
+(define t1 (list (list 1 2) (list 3 4) (list 5 6)))
+
+(define (tree-map proc t)
+  (cond ((null? t) t)
+	((pair? t) (cons (tree-map t) (tree-map t)))
+	(else (proc t))))
+
+; in the book it has (list nil)
+; nil = (list)
+; but (list nil) DOES NOT EQUAL (list)
+; set of empty set DOES NOT EQUAL empty set
+; (()) DOES NOT EQUAL ()
+(define (wrong-subsets s)
+  (if (null? s)
+      ; if rest is null, there is nothing to map over
+      ; then, in each level of the stack, rest is null
+      (list)
+      (let ((rest (wrong-subsets (cdr x))))
+	;(append () ()) -> ()
+	;by the base case of append
+	(append rest (map (lambda (x) (append (list (car s)) x)) rest)))))
+
+
+; if you have (1 2 3)
+; the subsets of (2 3)
+; (() (3) (2) (2 3))
+; are valid subsets of (1 2 3)
+; but they are all missing 1
+; notice the valid subsets of (3)
+; (() (3))
+; are contained in the subsets of (2 3)
+; top level of stack:
+; (car s): 3
+; rest: (())
+; (() (3))
+; (car s): 2
+; rest: (() (3))
+; (() (3) (2) (2 3))
+(define (subsets s)
+  (if (null? s)
+      (list (list))
+      (let ((rest (subsets (cdr s))))
+	(append rest (map (lambda (x) (append (list (car s)) x)) rest)))))
+
