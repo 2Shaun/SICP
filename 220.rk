@@ -1,0 +1,12 @@
+#lang <scheme>
+
+(define (same-parity x . y)
+  (define (same-parity-iter n parity-list)
+    (if (< n (length y))
+        (if (= (remainder x 2) (remainder (car y) 2))
+            (same-parity-iter (+ n 1) (append (list (car y) parity-list)))
+            (same-parity-iter (+ n 1) parity-list))
+        parity-list))
+  (same-parity-iter 0 y))
+
+(same-parity 1 2 3 4)
