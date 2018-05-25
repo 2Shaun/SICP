@@ -6,6 +6,9 @@
 (define (average a b)
   (/ (+ a b) 2))
 
+(define (square x)
+  (* x x))
+
 (define (make-rat n d)
   (cond ((or (and (> n 0) (> d 0)) (and (< n 0) (< d 0)) (and (> n 0) (< d 0)))
 	(let ((g (- (gcd n d))))
@@ -368,3 +371,55 @@ l
       (let ((rest (subsets (cdr s))))
 	(append rest (map (lambda (x) (append (list (car s)) x)) rest)))))
 
+(define (filter predicate sequence)
+  (cond ((null? sequence) sequence)
+	((predicate (car sequence))
+	 (cons (car sequence)
+	       (filter predicate (cdr sequence))))
+	(else (filter predicate (cdr sequence)))))
+
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+	  (accumulate op initial (cdr sequence)))))
+
+(define (enumerate-interval low high)
+  (if (> low high)
+      nil
+      (cons low (enumerate-interval (+ low 1) high))))
+
+(define (enumerate-tree tree)
+  (cond ((null? tree) (list))
+	((not (pair? tree)) (list tree))
+	(else (append (enumerate-tree (car tree))
+		      (enumerate-tree (cdr tree))))))
+
+(define (map p sequence)
+  (accumulate (lambda (x y) (append (list (p x)) y)) (list) sequence))
+
+; (accumulate cons <??> <??>)
+; n.b. think of the box-and-pointer representation of (cons 1 (list 2 3))
+; [_|_]->[_|_]->[_|_]->x
+;  1      2      3
+; the element in the first box of the pair is a 1
+; the element in the second box of the pair is a list
+(define (append seq1 seq2)
+  (accumulate cons seq2 seq1))
+
+(define (length l)
+  (accumulate (lambda (x y) (+ 1 y)) 0 l))
+
+; accumulate op init sequence
+; (op (car sequence) (accumulate op init (cdr of sequence)))
+; op: (lambda (this-coeff higher-terms) <??>)
+(define (horner-eval x coefficient-sequence)
+  (accumulate (lambda (this-coeff higher-terms) (+ this-coeff (* x higher-terms)))
+	      0
+	      coefficient-sequence))
+;(accumulate <??> <??> (map <??> <??>))
+; applying fringe to every tree in the tree creates a list of lists (of elements, not lists)
+; I think of it as flattening every tree in the tree
+; adding up the lengths of all of these lists gives the total number of leaves
+(define (count-leaves t)
+  (accumulate (lambda (x y) (+ x y)) 0 (map (lambda (x) (length (fringe x))) t)))
