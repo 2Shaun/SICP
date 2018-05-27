@@ -175,11 +175,12 @@ l
         parity-list))
   (same-parity-iter y (list)))
 
-(define (map proc items)
-  (if (null? items)
-      (list)
-      (cons (proc (car items))
-	    (map proc (cdr items)))))
+;(define (map proc items)
+;  (if (null? items)
+;      (list)
+;      (cons (proc (car items))
+;	    (map proc (cdr items)))))
+
 
 (define (scale-list items factor)
   (map (lambda (x) (* x factor)) items))
@@ -378,12 +379,6 @@ l
 	       (filter predicate (cdr sequence))))
 	(else (filter predicate (cdr sequence)))))
 
-(define (accumulate op initial sequence)
-  (if (null? sequence)
-      initial
-      (op (car sequence)
-	  (accumulate op initial (cdr sequence)))))
-
 (define (enumerate-interval low high)
   (if (> low high)
       nil
@@ -395,8 +390,8 @@ l
 	(else (append (enumerate-tree (car tree))
 		      (enumerate-tree (cdr tree))))))
 
-(define (map p sequence)
-  (accumulate (lambda (x y) (append (list (p x)) y)) (list) sequence))
+;(define (map p sequence)
+;  (accumulate (lambda (x y) (append (list (p x)) y)) (list) sequence))
 
 ; (accumulate cons <??> <??>)
 ; n.b. think of the box-and-pointer representation of (cons 1 (list 2 3))
@@ -423,3 +418,70 @@ l
 ; adding up the lengths of all of these lists gives the total number of leaves
 (define (count-leaves t)
   (accumulate (lambda (x y) (+ x y)) 0 (map (lambda (x) (length (fringe x))) t)))
+
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+	  (accumulate op initial (cdr sequence)))))
+
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs))
+      (list)
+      (cons (accumulate op init (map car seqs))
+	    (accumulate-n op init (map cdr seqs)))))
+
+(define (dot-product v w)
+  (accumulate + 0 (map * v w)))
+
+(define (scale-vector s v)
+  (map (lambda (x) (* s x)) v))
+
+; if map takes in a list of elements, it can apply a one argument procedure to all of them
+; if map takes in 2 lists of elements, it can apply a two argument procedure to all of them
+					; producing one list of the return values
+
+; (map <??> m)
+; matrices are a list of row vectors (as lists)
+; for each row
+(define (matrix-*-vector m v)
+  (map (lambda (mi) (dot-product mi v)) m))
+
+; (accumulate-n <??> <??> mat)
+; accumulate-n brings together all of the accumulations of each row using cons (this is built-in)
+; our accumulations cons together all of the first elements of each row (this was passed in as an arg)
+(define (transpose m)
+  (accumulate-n cons (list) m))
+
+; (define (matrix-*-matrix m n)
+; (let ((cols (transpose n)))
+; (map <??> m)))
+
+; this outputs the diagonal 
+; you get a list containing the dot product of the 1st row of m and the 1st column of n
+; the dot product of the 2nd row of m and the 2nd column of n
+; and so on...
+;(define (matrix-*-matrix m n)
+;  (let ((cols (transpose n)))
+;    (map dot-product cols m)))
+
+; I quickly lose understanding of these algorithms, despite having written them
+; I think it's because there are so many ways to think of matrix multiplication
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (transpose (map (lambda (nj) (matrix-*-vector m nj)) cols))))
+
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (map (lambda (mi) (matrix-*-vector cols mi)) m)))
+
+(define m1 (list (list 1 0 0) (list 0 1 0) (list 0 0 1)))
+
+(define m2 (list (list 1 2 3) (list 4 5 6) (list 7 8 9)))
+
+(define v1 (list 2 2 2))
+
+(define (test-dot x y . z)
+  (pair? z))
+
+
