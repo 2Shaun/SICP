@@ -465,11 +465,42 @@ l
 ;  (let ((cols (transpose n)))
 ;    (map dot-product cols m)))
 
-; I quickly lose understanding of these algorithms, despite having written them
-; I think it's because there are so many ways to think of matrix multiplication
-(define (matrix-*-matrix m n)
-  (let ((cols (transpose n)))
-    (transpose (map (lambda (nj) (matrix-*-vector m nj)) cols))))
+; A*B
+; a1 is row 1 of A
+; A = (a1 a2 a3)
+; B = (b1 b2 b3)
+; BT, transpose(B) is the columns of B represented as a list of row vectors
+; bT1 is column 1 of B
+; BT = (bT1 bT2 bT3)
+; with the Scheme convention of representing matrices as row vectors
+; it is easier to transpose B first so we can think in terms of dot products
+;       •bT1 •bT2 •bT3      
+; a1• [               ]
+; a2• [               ]
+; a3• [               ]
+; row 1 of A*B is all dot products with a1
+; column 1 of A*B is all dot products with bT1
+; column 1 of A*B can also be thought of as A*bT1 or A times the first column of B
+; thus, (map (lambda (bTj) (matrix-*-vector A bTj)) BT)
+; returns a list of the columns of A*B
+; this must be transposed to follow scheme convention
+; if we don't want to tranpose, we need to think of how to compute the rows of A*B
+; since the first row of A*B is a1 dotted with the columns of B,
+; row 1 is a1*BT
+;
+; [- - -] [-] [-]
+; [- - -]•[-]=[-]
+; [- - -] [-] [-]
+; but because of Scheme's convention
+; we want to think of the outputs as row vectors
+;
+;        [- - -]         
+;[- - -]•[- - -]=[- - -]
+;        [- - -]
+;
+(define (matrix-*-matrix A B)
+  (let ((BT (transpose B)))
+    (transpose (map (lambda (bTj) (matrix-*-vector A bTj)) BT))))
 
 (define (matrix-*-matrix m n)
   (let ((cols (transpose n)))
@@ -483,5 +514,30 @@ l
 
 (define (test-dot x y . z)
   (pair? z))
+
+(define (fold-left op initial sequence)
+  (define (iter result rest)
+    (if (null? rest)
+	result
+	(iter (op result (car rest))
+	      (cdr rest))))
+  (iter initial sequence))
+
+(define (fold-right op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+	  (accumulate op initial (cdr sequence)))))
+; (fold-right / 1 (list 1 2 3))
+; (1/(2/(3/1)))=3/2
+
+(define (reverse-right sequence)
+  (fold-right (lambda (x y) (append y (list x))) (list) sequence))
+
+(define (reverse-left sequence)
+  (fold-left (lambda (x y) (append (list y) x)) (list) sequence))
+
+
+
 
 
