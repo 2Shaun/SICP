@@ -381,7 +381,7 @@ l
 
 (define (enumerate-interval low high)
   (if (> low high)
-      nil
+      (list)
       (cons low (enumerate-interval (+ low 1) high))))
 
 (define (enumerate-tree tree)
@@ -419,6 +419,7 @@ l
 (define (count-leaves t)
   (accumulate (lambda (x y) (+ x y)) 0 (map (lambda (x) (length (fringe x))) t)))
 
+; think of op going between the elements of sequence
 (define (accumulate op initial sequence)
   (if (null? sequence)
       initial
@@ -515,6 +516,16 @@ l
 (define (test-dot x y . z)
   (pair? z))
 
+; the list changes through the argument of fold-right
+(define (fold-right op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+	  (fold-right op initial (cdr sequence)))))
+; (fold-right / 1 (list 1 2 3))
+; (1/(2/(3/1)))=3/2
+
+; the list changes through the argument of iter
 (define (fold-left op initial sequence)
   (define (iter result rest)
     (if (null? rest)
@@ -523,21 +534,59 @@ l
 	      (cdr rest))))
   (iter initial sequence))
 
-(define (fold-right op initial sequence)
-  (if (null? sequence)
-      initial
-      (op (car sequence)
-	  (accumulate op initial (cdr sequence)))))
-; (fold-right / 1 (list 1 2 3))
-; (1/(2/(3/1)))=3/2
-
+; x <- (car sequence) y <- initial
 (define (reverse-right sequence)
   (fold-right (lambda (x y) (append y (list x))) (list) sequence))
 
+; x <- initial y <- (car rest)
 (define (reverse-left sequence)
   (fold-left (lambda (x y) (append (list y) x)) (list) sequence))
 
 
+; the proc argument should return a list
+; because (map proc seq) is going to return a list of whatever proc returns
+; since we're dealing with accumulate,
+; you can think of 'append' going inbetween the list returned by (map proc seq)
+(define (flatmap proc seq)
+  (accumulate append (list) (map proc seq)))
+
+(define (prime-sum? pair)
+  (prime? (+ (car pair) (cadr pair))))
+
+(define (make-pair-sum pair)
+  (list (car pair) (cadr pair) (+ (car pair) (cadr pair))))
+
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter prime-sum?
+	       (flatmap
+		(lambda (i)
+		  (map (lambda (j) (list i j))
+		       (enumerate-interval 1 (- i 1))))
+		(enumerate-interval 1 n)))))
 
 
+(define (unique-pairs n)
+  (accumulate append (list) (map (lambda (i) (map (lambda (j) (list j i)) (enumerate-interval 1 (- i 1)))) (enumerate-interval 1 n))))
 
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter prime-sum?
+	       (unique-pairs n))))
+
+(define (s-sum? triple s)
+  (if (= (accumulate + 0 triple) s) #t
+      #f))
+
+(define (unique-triples n)
+  (accumulate append (list) (accumulate append (list)
+	      (map (lambda (j)
+		     (map (lambda (i)
+			    (map (lambda (k) (list k j i)) (enumerate-interval 1 (- i 1))))
+			  (enumerate-interval 1 (- j 1))))
+		   (enumerate-interval 1 n)))))
+
+(define (s-sum-triples n s)
+  (filter (lambda (triple) (if (= (accumulate + 0 triple) s) #t
+			       #f))
+		  (unique-triples n)))
